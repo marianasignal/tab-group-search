@@ -30,7 +30,7 @@
 
 ### ARCH — 技术基础
 
-- [ ] **ARC-01**: Chrome Manifest V3 扩展
+- [x] **ARC-01**: Chrome Manifest V3 扩展
 - [ ] **ARC-02**: 使用 chrome.tabGroups API + chrome.tabs API 监听标签组变化
 - [ ] **ARC-03**: 数据本地存储 (chrome.storage.local)
 - [ ] **ARC-04**: Service Worker 无状态设计
@@ -55,7 +55,7 @@
 
 | Requirement | Phase   | Status  |
 | ----------- | ------- | ------- |
-| ARC-01      | Phase 1 | Pending |
+| ARC-01      | Phase 1 | Complete |
 | ARC-02      | Phase 1 | Pending |
 | ARC-03      | Phase 1 | Pending |
 | ARC-04      | Phase 1 | Pending |

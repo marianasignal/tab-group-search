@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 4. chrome.tabGroups API 和 chrome.tabs API 可以正常调用
 
 Plans:
-- [ ] 01-01-PLAN.md — 项目初始化 + Manifest V3 配置 + 构建管线 (ARC-01)
+- [x] 01-01-PLAN.md — 项目初始化 + Manifest V3 配置 + 构建管线 (ARC-01)
 - [ ] 01-02-PLAN.md — Service Worker 实现 + API 验证 (ARC-02, ARC-03, ARC-04)
 
 ### Phase 2: 标签组同步
