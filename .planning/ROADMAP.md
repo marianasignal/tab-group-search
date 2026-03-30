@@ -38,17 +38,21 @@ Plans:
 
 ### Phase 2: 标签组同步
 
-**Goal**: 用户在 Chrome 中对标签组的所有操作都自动持久化，关闭后也能找到历史记录
+**Goal**: 用户在 Chrome 中对标签组的所有操作都自动持久化，与 Chrome 标签组保持镜像同步
 **Depends on**: Phase 1
-**Requirements**: SYN-01, SYN-02, SYN-03, SYN-04
+**Requirements**: SYN-01, SYN-02, SYN-04
+**Plans:** 2 plans
 **Success Criteria** (what must be TRUE):
 
 1. 用户新建或修改标签组时，数据自动出现在本地存储中
-2. 关闭的标签页/标签组数据不被删除，仍可查询
-3. 同一 URL 重复加入标签组时更新记录而不是新建条目
+2. 用户关闭标签页/删除标签组时，对应记录自动删除（镜像同步）
+3. 同一 URL 在同一标签组中只有 1 条记录
 4. 每条记录包含：分组名称、网页标题、URL、同步时间
-   **Plans**: TBD
-   **UI hint**: yes
+5. 扩展首次安装时，现有标签组数据已同步
+
+Plans:
+- [ ] 02-01-PLAN.md — 数据模型和同步工具函数 (SYN-02, SYN-04)
+- [ ] 02-02-PLAN.md — 事件监听器和自动同步 (SYN-01, SYN-02)
 
 ### Phase 3: 搜索面板
 
