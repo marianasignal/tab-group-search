@@ -1,4 +1,5 @@
 import type { StorageTestData } from '../types/storage';
+import * as sync from './sync';
 
 /**
  * 注意力队列 - Service Worker (MV3)
@@ -66,6 +67,27 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 
   console.log('[Attention Queue] === Phase 1 verification complete ===');
+
+  // Phase 2: 初始同步现有标签组
+  console.log('[Tab Sync] Starting initial sync...');
+  try {
+    const groups = await chrome.tabGroups.query({});
+    let records = await sync.getAllRecords();
+
+    for (const group of groups) {
+      const tabs = await chrome.tabs.query({ groupId: group.id });
+      for (const tab of tabs) {
+        if (tab.url && tab.title) {
+          records = sync.upsertRecord(records, tab, group);
+        }
+      }
+    }
+
+    await sync.saveAllRecords(records);
+    console.log('[Tab Sync] Initial sync complete:', records.length, 'records');
+  } catch (error) {
+    console.error('[Tab Sync] Initial sync failed:', error);
+  }
 });
 
 // ============================================
@@ -88,3 +110,87 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     console.error('[Attention Queue] Failed to read persisted data:', error);
   }
 })();
+
+// ============================================
+// Phase 2: 标签组同步事件监听
+// ============================================
+
+chrome.tabGroups.onCreated.addListener(async (group) => {
+  console.log('[Tab Sync] Group created:', group.id, group.title);
+  try {
+    const tabs = await chrome.tabs.query({ groupId: group.id });
+    let records = await sync.getAllRecords();
+
+    for (const tab of tabs) {
+      if (tab.url && tab.title) {
+        records = sync.upsertRecord(records, tab, group);
+      }
+    }
+
+    await sync.saveAllRecords(records);
+    console.log('[Tab Sync] Group created, synced', tabs.length, 'tabs');
+  } catch (error) {
+    console.error('[Tab Sync] Failed to sync created group:', error);
+  }
+});
+
+chrome.tabGroups.onUpdated.addListener(async (group) => {
+  console.log('[Tab Sync] Group updated:', group.id, group.title);
+  try {
+    let records = await sync.getAllRecords();
+    records = sync.updateGroupInfo(records, group.id, group.title || '(untitled)', group.color);
+    await sync.saveAllRecords(records);
+    console.log('[Tab Sync] Group info updated');
+  } catch (error) {
+    console.error('[Tab Sync] Failed to update group:', error);
+  }
+});
+
+chrome.tabGroups.onRemoved.addListener(async (group) => {
+  console.log('[Tab Sync] Group removed:', group.id);
+  try {
+    let records = await sync.getAllRecords();
+    records = sync.deleteRecordsByGroupId(records, group.id);
+    await sync.saveAllRecords(records);
+    console.log('[Tab Sync] Group records deleted');
+  } catch (error) {
+    console.error('[Tab Sync] Failed to delete group records:', error);
+  }
+});
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (!changeInfo.groupId) return;
+
+  console.log('[Tab Sync] Tab groupId changed:', tabId, changeInfo.groupId);
+  try {
+    let records = await sync.getAllRecords();
+
+    if (changeInfo.groupId === -1) {
+      records = sync.deleteRecordByTabId(records, tabId);
+      await sync.saveAllRecords(records);
+      console.log('[Tab Sync] Tab removed from group');
+      return;
+    }
+
+    const group = await chrome.tabGroups.get(changeInfo.groupId);
+    if (tab.url && tab.title) {
+      records = sync.upsertRecord(records, tab, group);
+      await sync.saveAllRecords(records);
+      console.log('[Tab Sync] Tab added to group:', group.title);
+    }
+  } catch (error) {
+    console.error('[Tab Sync] Failed to sync tab update:', error);
+  }
+});
+
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  console.log('[Tab Sync] Tab removed:', tabId);
+  try {
+    let records = await sync.getAllRecords();
+    records = sync.deleteRecordByTabId(records, tabId);
+    await sync.saveAllRecords(records);
+    console.log('[Tab Sync] Tab record deleted');
+  } catch (error) {
+    console.error('[Tab Sync] Failed to delete tab record:', error);
+  }
+});
