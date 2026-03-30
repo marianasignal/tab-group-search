@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "注意力队列 - Attention Queue",
+  "version": "0.1.0",
+  "description": "Chrome 标签组的搜索层 + 持久化层",
+  "permissions": [
+    "storage",
+    "tabGroups",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "src/background/index.ts",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
