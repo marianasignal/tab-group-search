@@ -53,11 +53,22 @@
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| ARC-01 ~ ARC-04 | Phase 1 | Pending |
-| SYN-01 ~ SYN-04 | Phase 2 | Pending |
-| SEA-01 ~ SEA-05 | Phase 3 | Pending |
+| Requirement | Phase   | Status  |
+| ----------- | ------- | ------- |
+| ARC-01      | Phase 1 | Pending |
+| ARC-02      | Phase 1 | Pending |
+| ARC-03      | Phase 1 | Pending |
+| ARC-04      | Phase 1 | Pending |
+| SYN-01      | Phase 2 | Pending |
+| SYN-02      | Phase 2 | Pending |
+| SYN-03      | Phase 2 | Pending |
+| SYN-04      | Phase 2 | Pending |
+| SEA-01      | Phase 3 | Pending |
+| SEA-02      | Phase 3 | Pending |
+| SEA-03      | Phase 3 | Pending |
+| SEA-04      | Phase 3 | Pending |
+| SEA-05      | Phase 3 | Pending |
 
 ---
-*Updated: 2026-03-30 — 调整为标签组同步 + 搜索层架构*
+
+_Updated: 2026-03-30 — Roadmap created, traceability expanded to individual requirements_
