@@ -24,13 +24,17 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Goal**: 可运行的扩展骨架就位，所有后续功能的地基确立
 **Depends on**: Nothing (first phase)
 **Requirements**: ARC-01, ARC-02, ARC-03, ARC-04
+**Plans:** 2 plans
 **Success Criteria** (what must be TRUE):
 
 1. 扩展可以加载到 Chrome 且不报错 (chrome://extensions 显示已启用)
 2. Service Worker 可以正常注册并响应事件
 3. 数据可以写入 chrome.storage.local 并在 Service Worker 重启后读取
 4. chrome.tabGroups API 和 chrome.tabs API 可以正常调用
-   **Plans**: TBD
+
+Plans:
+- [ ] 01-01-PLAN.md — 项目初始化 + Manifest V3 配置 + 构建管线 (ARC-01)
+- [ ] 01-02-PLAN.md — Service Worker 实现 + API 验证 (ARC-02, ARC-03, ARC-04)
 
 ### Phase 2: 标签组同步
 
@@ -68,6 +72,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase         | Plans Complete | Status      | Completed |
 | ------------- | -------------- | ----------- | --------- |
-| 1. 技术架构   | 0/?            | Not started | -         |
+| 1. 技术架构   | 0/2            | Planning    | -         |
 | 2. 标签组同步 | 0/?            | Not started | -         |
 | 3. 搜索面板   | 0/?            | Not started | -         |
