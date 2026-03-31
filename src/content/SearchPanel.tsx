@@ -77,26 +77,31 @@ const S = {
     fontSize: "14px",
   },
   item: (selected: boolean) => ({
-    padding: "14px 16px",
+    padding: "10px 16px",
     cursor: "pointer",
     borderBottom: "1px solid #1a1a1a",
     borderLeft: selected ? "3px solid #ffffff" : "3px solid transparent",
     backgroundColor: selected ? "#1a1a1a" : "transparent",
   }),
   itemTitle: (selected: boolean) => ({
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: 500,
     color: selected ? "#ffffff" : "#cccccc",
-    marginBottom: "6px",
     lineHeight: "1.4",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
+    flex: 1,
   }),
   tag: {
     display: "inline-block",
-    padding: "2px 8px",
+    padding: "2px 6px",
     fontSize: "11px",
     borderRadius: "3px",
     backgroundColor: "#333333",
     color: "#aaaaaa",
+    whiteSpace: "nowrap" as const,
+    flexShrink: 0,
   },
 };
 
@@ -137,18 +142,6 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
   }, [searchQuery, records, selectedGroup]);
 
   useEffect(() => setSelectedIndex(0), [searchResults]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.code === "Space") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [isOpen, onClose]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -216,8 +209,10 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
                 style={S.item(index === selectedIndex)}
                 onClick={() => handleOpenUrl(record.url)}
               >
-                <div style={S.itemTitle(index === selectedIndex)}>{record.title}</div>
-                <span style={S.tag}>{record.groupName}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={S.tag}>{record.groupName}</span>
+                  <div style={S.itemTitle(index === selectedIndex)}>{record.title}</div>
+                </div>
               </div>
             ))
           )}

@@ -30,19 +30,20 @@ const App = () => {
     };
   }, []); // 移除 isOpen 依赖，避免重复注册
 
-  // 单独处理 Esc 键
+  // 监听 Ctrl+Space 关闭
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        console.log('[Content Script] Esc pressed, closing panel');
+      if (e.ctrlKey && e.code === "Space" && isOpen) {
+        e.preventDefault();
+        console.log('[Content Script] Ctrl+Space pressed, closing panel');
         setIsOpen(false);
       }
     };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown, true);
       return () => {
-        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keydown", handleKeyDown, true);
       };
     }
   }, [isOpen]);
