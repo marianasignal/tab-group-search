@@ -174,11 +174,20 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
               {searchResults.map((record, index) => (
                 <div
                   key={record.url}
-                  className={`p-3 cursor-pointer ${
+                  className={`p-3 cursor-pointer transition-colors ${
                     index === selectedIndex
-                      ? "bg-blue-50 border-l-4 border-blue-500"
+                      ? "bg-blue-100 border-l-4 border-blue-600"
                       : "hover:bg-gray-50"
                   }`}
+                  style={
+                    index === selectedIndex
+                      ? {
+                          backgroundColor: "#dbeafe !important",
+                          borderLeftWidth: "4px",
+                          borderLeftColor: "#2563eb",
+                        }
+                      : undefined
+                  }
                   onClick={() => handleOpenUrl(record.url)}
                 >
                   <div className="font-medium text-gray-900">{record.title}</div>
