@@ -115,6 +115,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 // Phase 2: 标签组同步事件监听
 // ============================================
 
+// Debounce map for group updates
+const groupUpdateTimers = new Map<number, number>();
+
 chrome.tabGroups.onCreated.addListener(async (group) => {
   console.log('[Tab Sync] Group created:', group.id, group.title);
   try {
@@ -136,14 +139,26 @@ chrome.tabGroups.onCreated.addListener(async (group) => {
 
 chrome.tabGroups.onUpdated.addListener(async (group) => {
   console.log('[Tab Sync] Group updated:', group.id, group.title);
-  try {
-    let records = await sync.getAllRecords();
-    records = sync.updateGroupInfo(records, group.id, group.title || '(untitled)', group.color);
-    await sync.saveAllRecords(records);
-    console.log('[Tab Sync] Group info updated');
-  } catch (error) {
-    console.error('[Tab Sync] Failed to update group:', error);
+
+  // Clear existing timer
+  if (groupUpdateTimers.has(group.id)) {
+    clearTimeout(groupUpdateTimers.get(group.id));
   }
+
+  // Set new timer (2000ms debounce)
+  const timerId = setTimeout(async () => {
+    try {
+      let records = await sync.getAllRecords();
+      records = sync.updateGroupInfo(records, group.id, group.title || '(untitled)', group.color);
+      await sync.saveAllRecords(records);
+      console.log('[Tab Sync] Group info updated (debounced)');
+      groupUpdateTimers.delete(group.id);
+    } catch (error) {
+      console.error('[Tab Sync] Failed to update group:', error);
+    }
+  }, 2000);
+
+  groupUpdateTimers.set(group.id, timerId as unknown as number);
 });
 
 chrome.tabGroups.onRemoved.addListener(async (group) => {
