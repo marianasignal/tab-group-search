@@ -18,6 +18,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
   const [groups, setGroups] = useState<Array<{ name: string; color: string }>>(
     [],
   );
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   // 加载数据
   useEffect(() => {
@@ -71,6 +72,26 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery, records, selectedGroup]);
 
+  // 重置选中索引
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [searchResults]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) =>
+        prev < searchResults.length - 1 ? prev + 1 : prev,
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+    } else if (e.key === "Enter" && searchResults[selectedIndex]) {
+      e.preventDefault();
+      handleOpenUrl(searchResults[selectedIndex].url);
+    }
+  };
+
   const handleOpenUrl = (url: string) => {
     chrome.tabs.create({ url });
     onClose();
@@ -93,6 +114,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="搜索网页标题、URL 或分组..."
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
@@ -136,10 +158,14 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             <div className="text-gray-400 text-center py-8">没有找到匹配的网页</div>
           ) : (
             <div className="divide-y">
-              {searchResults.map((record) => (
+              {searchResults.map((record, index) => (
                 <div
                   key={record.url}
-                  className="p-3 hover:bg-gray-50 cursor-pointer"
+                  className={`p-3 cursor-pointer ${
+                    index === selectedIndex
+                      ? "bg-blue-50 border-l-4 border-blue-500"
+                      : "hover:bg-gray-50"
+                  }`}
                   onClick={() => handleOpenUrl(record.url)}
                 >
                   <div className="font-medium text-gray-900">{record.title}</div>
