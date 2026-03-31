@@ -12,27 +12,39 @@ const App = () => {
       sender: chrome.runtime.MessageSender,
       sendResponse: (response?: any) => void
     ) => {
+      console.log('[Content Script] Message received:', message.type);
       if (message.type === 'TOGGLE_SEARCH_PANEL') {
-        setIsOpen((prev) => !prev);
+        setIsOpen((prev) => {
+          console.log('[Content Script] Toggle panel:', !prev);
+          return !prev;
+        });
         sendResponse({ success: true });
       }
+      return true; // 保持消息通道开启
     };
 
     chrome.runtime.onMessage.addListener(messageListener);
 
-    // 监听 Esc 键关闭面板
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener);
+    };
+  }, []); // 移除 isOpen 依赖，避免重复注册
+
+  // 单独处理 Esc 键
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
+        console.log('[Content Script] Esc pressed, closing panel');
         setIsOpen(false);
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      chrome.runtime.onMessage.removeListener(messageListener);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }
   }, [isOpen]);
 
   return <SearchPanel isOpen={isOpen} onClose={() => setIsOpen(false)} />;
@@ -45,3 +57,5 @@ document.body.appendChild(container);
 
 const root = createRoot(container);
 root.render(<App />);
+
+console.log('[Content Script] Initialized');
