@@ -17,9 +17,3 @@
 #attention-queue-search-panel > * {
   pointer-events: auto !important;
 }
-
-/* 重置 Content Script 注入的样式，避免被页面样式污染 */
-#attention-queue-search-panel * {
-  all: revert;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
