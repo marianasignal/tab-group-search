@@ -78,22 +78,35 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
   }, [searchResults]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    console.log('[SearchPanel] Key pressed:', e.key, 'selectedIndex:', selectedIndex, 'results:', searchResults.length);
+
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((prev) =>
-        prev < searchResults.length - 1 ? prev + 1 : prev,
-      );
+      setSelectedIndex((prev) => {
+        const newIndex = prev < searchResults.length - 1 ? prev + 1 : prev;
+        console.log('[SearchPanel] ArrowDown: moving from', prev, 'to', newIndex);
+        return newIndex;
+      });
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+      setSelectedIndex((prev) => {
+        const newIndex = prev > 0 ? prev - 1 : prev;
+        console.log('[SearchPanel] ArrowUp: moving from', prev, 'to', newIndex);
+        return newIndex;
+      });
     } else if (e.key === "Enter" && searchResults[selectedIndex]) {
       e.preventDefault();
+      console.log('[SearchPanel] Enter pressed, opening:', searchResults[selectedIndex].url);
       handleOpenUrl(searchResults[selectedIndex].url);
     }
   };
 
   const handleOpenUrl = (url: string) => {
-    chrome.tabs.create({ url });
+    console.log('[SearchPanel] Opening URL:', url);
+    // Content script 无法直接调用 chrome.tabs.create，需要通过 background
+    chrome.runtime.sendMessage({ type: 'OPEN_URL', url }, (response) => {
+      console.log('[SearchPanel] URL opened:', response);
+    });
     onClose();
   };
 

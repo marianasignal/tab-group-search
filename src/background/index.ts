@@ -266,3 +266,15 @@ chrome.commands.onCommand.addListener(async (command) => {
     }
   }
 });
+
+// 监听来自 content script 的消息
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'OPEN_URL') {
+    console.log('[Background] Opening URL:', message.url);
+    chrome.tabs.create({ url: message.url }, (tab) => {
+      console.log('[Background] Tab created:', tab.id);
+      sendResponse({ success: true, tabId: tab.id });
+    });
+    return true; // 保持消息通道开启
+  }
+});
