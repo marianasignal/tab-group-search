@@ -280,12 +280,37 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === 'TOGGLE_SEARCH_FROM_POPUP') {
     console.log('[Background] Toggle search from popup for tab:', message.tabId);
-    chrome.tabs.sendMessage(message.tabId, { type: 'TOGGLE_SEARCH_PANEL' })
-      .then(() => sendResponse({ success: true }))
-      .catch((error) => {
-        console.error('[Background] Failed to toggle search:', error);
-        sendResponse({ success: false, error: error.message });
-      });
+
+    (async () => {
+      try {
+        await chrome.tabs.sendMessage(message.tabId, { type: 'TOGGLE_SEARCH_PANEL' });
+        sendResponse({ success: true });
+      } catch (error: any) {
+        // Content script 未加载，尝试注入
+        if (error.message?.includes('Could not establish connection')) {
+          console.log('[Background] Content script not loaded, injecting...');
+          try {
+            await chrome.scripting.executeScript({
+              target: { tabId: message.tabId },
+              files: ['src/content/index.tsx']
+            });
+            await chrome.scripting.insertCSS({
+              target: { tabId: message.tabId },
+              files: ['src/content/index.css']
+            });
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await chrome.tabs.sendMessage(message.tabId, { type: 'TOGGLE_SEARCH_PANEL' });
+            sendResponse({ success: true });
+          } catch (injectError) {
+            console.error('[Background] Failed to inject:', injectError);
+            sendResponse({ success: false, error: 'injection_failed' });
+          }
+        } else {
+          sendResponse({ success: false, error: error.message });
+        }
+      }
+    })();
+
     return true;
   }
 });
