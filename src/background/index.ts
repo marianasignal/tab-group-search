@@ -267,7 +267,7 @@ chrome.commands.onCommand.addListener(async (command) => {
   }
 });
 
-// 监听来自 content script 的消息
+// 监听来自 content script 和 popup 的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'OPEN_URL') {
     console.log('[Background] Opening URL:', message.url);
@@ -275,6 +275,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log('[Background] Tab created:', tab.id);
       sendResponse({ success: true, tabId: tab.id });
     });
-    return true; // 保持消息通道开启
+    return true;
+  }
+
+  if (message.type === 'TOGGLE_SEARCH_FROM_POPUP') {
+    console.log('[Background] Toggle search from popup for tab:', message.tabId);
+    chrome.tabs.sendMessage(message.tabId, { type: 'TOGGLE_SEARCH_PANEL' })
+      .then(() => sendResponse({ success: true }))
+      .catch((error) => {
+        console.error('[Background] Failed to toggle search:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true;
   }
 });
