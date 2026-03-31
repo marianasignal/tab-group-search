@@ -33,6 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 4. chrome.tabGroups API 和 chrome.tabs API 可以正常调用
 
 Plans:
+
 - [x] 01-01-PLAN.md — 项目初始化 + Manifest V3 配置 + 构建管线 (ARC-01)
 - [x] 01-02-PLAN.md — Service Worker 实现 + API 验证 (ARC-02, ARC-03, ARC-04)
 
@@ -51,6 +52,7 @@ Plans:
 5. 扩展首次安装时，现有标签组数据已同步
 
 Plans:
+
 - [ ] 02-01-PLAN.md — 数据模型和同步工具函数 (SYN-02, SYN-04)
 - [ ] 02-02-PLAN.md — 事件监听器和自动同步 (SYN-01, SYN-02)
 
@@ -59,6 +61,7 @@ Plans:
 **Goal**: 用户可以在 3 秒内通过快捷键唤起面板并找到任何保存过的网页
 **Depends on**: Phase 2
 **Requirements**: SEA-01, SEA-02, SEA-03, SEA-04, SEA-05
+**Plans:** 4 plans
 **Success Criteria** (what must be TRUE):
 
 1. 按下快捷键，搜索面板立即弹出
@@ -66,8 +69,13 @@ Plans:
 3. 可以按分组名称过滤，只看某个分组的内容
 4. 每条搜索结果展示网页标题、URL 和所属分组
 5. 点击结果在新标签页打开对应网页
-   **Plans**: TBD
-   **UI hint**: yes
+
+Plans:
+
+- [ ] 03-01-PLAN.md — 搜索面板 UI 组件与快捷键 (SEA-01, SEA-04)
+- [ ] 03-02-PLAN.md — 实时搜索功能 (SEA-02, SEA-04)
+- [ ] 03-03-PLAN.md — 分组过滤功能 (SEA-03)
+- [ ] 03-04-PLAN.md — 键盘导航优化 (SEA-02, SEA-05)
 
 ## Progress
 
