@@ -30,12 +30,11 @@ const App = () => {
     };
   }, []); // 移除 isOpen 依赖，避免重复注册
 
-  // 监听 Ctrl+Space 关闭
+  // 监听 Esc 关闭
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.code === "Space" && isOpen) {
+      if (e.key === "Escape" && isOpen) {
         e.preventDefault();
-        console.log('[Content Script] Ctrl+Space pressed, closing panel');
         setIsOpen(false);
       }
     };
