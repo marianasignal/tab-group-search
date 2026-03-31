@@ -133,35 +133,35 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-start justify-start z-[999999]"
+      className="fixed inset-0 bg-black/80 flex items-start justify-start z-[999999]"
       onClick={onClose}
     >
       <div
-        className="bg-white shadow-2xl w-[450px] h-full flex flex-col"
+        className="bg-black border-r border-gray-700 shadow-2xl w-[450px] h-full flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 搜索框 */}
-        <div className="p-4 border-b">
+        <div className="p-4 border-b border-gray-700">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="搜索网页标题、URL 或分组..."
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-gray-900 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
             autoFocus
           />
         </div>
 
         {/* 分组过滤标签 */}
         {groups.length > 0 && (
-          <div className="px-4 py-2 border-b flex gap-2 flex-wrap">
+          <div className="px-4 py-2 border-b border-gray-700 flex gap-2 flex-wrap">
             <button
               onClick={() => setSelectedGroup(null)}
-              className={`px-3 py-1 text-sm rounded ${
+              className={`px-3 py-1 text-sm rounded transition-all ${
                 selectedGroup === null
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-white text-black"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-600"
               }`}
             >
               全部
@@ -170,12 +170,14 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
               <button
                 key={group.name}
                 onClick={() => setSelectedGroup(group.name)}
-                className={`px-3 py-1 text-sm rounded transition-all font-medium ${
-                  selectedGroup === group.name ? "ring-4 ring-blue-500 scale-110 shadow-lg" : "hover:scale-105"
+                className={`px-3 py-1 text-sm rounded transition-all ${
+                  selectedGroup === group.name
+                    ? "ring-2 ring-white scale-105"
+                    : "hover:scale-105 opacity-80 hover:opacity-100"
                 }`}
                 style={{
                   backgroundColor: group.color || "#6b7280",
-                  color: getTextColor(group.color || "#6b7280"),
+                  color: "#ffffff",
                 }}
               >
                 {group.name}
@@ -187,39 +189,30 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         {/* 结果列表 */}
         <div className="flex-1 overflow-y-auto">
           {searchResults.length === 0 ? (
-            <div className="text-gray-400 text-center py-8">没有找到匹配的网页</div>
+            <div className="text-gray-500 text-center py-8">没有找到匹配的网页</div>
           ) : (
-            <div className="divide-y">
+            <div>
               {searchResults.map((record, index) => (
                 <div
                   key={record.url}
-                  className={`p-4 cursor-pointer transition-all ${
+                  className={`p-4 cursor-pointer transition-all border-b border-gray-800 ${
                     index === selectedIndex
-                      ? "bg-blue-500 border-l-8 border-blue-700 shadow-lg"
-                      : "hover:bg-gray-50"
+                      ? "bg-gray-900 border-l-4 border-white"
+                      : "hover:bg-gray-900/50"
                   }`}
-                  style={
-                    index === selectedIndex
-                      ? {
-                          backgroundColor: "#3b82f6",
-                          borderLeftWidth: "8px",
-                          borderLeftColor: "#1d4ed8",
-                        }
-                      : undefined
-                  }
                   onClick={() => handleOpenUrl(record.url)}
                 >
                   <div className={`font-medium mb-2 ${
-                    index === selectedIndex ? "text-white" : "text-gray-900"
+                    index === selectedIndex ? "text-white" : "text-gray-300"
                   }`}>
                     {record.title}
                   </div>
                   <div>
                     <span
-                      className="inline-block px-2 py-1 text-xs rounded font-medium"
+                      className="inline-block px-2 py-1 text-xs rounded"
                       style={{
                         backgroundColor: record.groupColor || "#6b7280",
-                        color: getTextColor(record.groupColor || "#6b7280")
+                        color: "#ffffff",
                       }}
                     >
                       {record.groupName}
