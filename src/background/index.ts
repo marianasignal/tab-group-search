@@ -219,9 +219,47 @@ chrome.commands.onCommand.addListener(async (command) => {
     console.log('[Search Panel] Toggle command received');
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab.id) {
+
+      if (!tab.id) {
+        console.warn('[Search Panel] No active tab found');
+        return;
+      }
+
+      // 检查是否是特殊页面（chrome://, edge://, about:, etc.）
+      if (tab.url && (
+        tab.url.startsWith('chrome://') ||
+        tab.url.startsWith('edge://') ||
+        tab.url.startsWith('about:') ||
+        tab.url.startsWith('chrome-extension://')
+      )) {
+        console.warn('[Search Panel] Cannot inject on special pages:', tab.url);
+        return;
+      }
+
+      // 尝试发送消息
+      try {
         await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SEARCH_PANEL' });
         console.log('[Search Panel] Message sent to tab:', tab.id);
+      } catch (sendError: any) {
+        // 如果 content script 还没加载，尝试注入
+        if (sendError.message?.includes('Could not establish connection')) {
+          console.log('[Search Panel] Content script not ready, injecting...');
+          try {
+            await chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: ['src/content/index.tsx']
+            });
+            // 等待一小段时间让 content script 初始化
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // 重试发送消息
+            await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SEARCH_PANEL' });
+            console.log('[Search Panel] Message sent after injection');
+          } catch (injectError) {
+            console.error('[Search Panel] Failed to inject content script:', injectError);
+          }
+        } else {
+          throw sendError;
+        }
       }
     } catch (error) {
       console.error('[Search Panel] Failed to send message:', error);
