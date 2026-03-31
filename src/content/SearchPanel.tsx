@@ -114,11 +114,11 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999999]"
+      className="fixed inset-0 bg-black/50 flex items-start justify-end z-[999999]"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-2xl w-[600px] max-h-[500px] flex flex-col"
+        className="bg-white shadow-2xl w-[400px] h-full flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 搜索框 */}
@@ -174,28 +174,36 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
               {searchResults.map((record, index) => (
                 <div
                   key={record.url}
-                  className={`p-3 cursor-pointer transition-colors ${
+                  className={`p-4 cursor-pointer transition-all ${
                     index === selectedIndex
-                      ? "bg-blue-100 border-l-4 border-blue-600"
+                      ? "bg-blue-500 border-l-8 border-blue-700 shadow-lg"
                       : "hover:bg-gray-50"
                   }`}
                   style={
                     index === selectedIndex
                       ? {
-                          backgroundColor: "#dbeafe !important",
-                          borderLeftWidth: "4px",
-                          borderLeftColor: "#2563eb",
+                          backgroundColor: "#3b82f6",
+                          borderLeftWidth: "8px",
+                          borderLeftColor: "#1d4ed8",
                         }
                       : undefined
                   }
                   onClick={() => handleOpenUrl(record.url)}
                 >
-                  <div className="font-medium text-gray-900">{record.title}</div>
-                  <div className="text-sm text-gray-500 mt-1">{record.url}</div>
-                  <div className="mt-1">
+                  <div className={`text-sm font-mono mb-2 truncate ${
+                    index === selectedIndex ? "text-blue-100" : "text-gray-500"
+                  }`}>
+                    {record.url}
+                  </div>
+                  <div className={`font-medium mb-2 ${
+                    index === selectedIndex ? "text-white" : "text-gray-900"
+                  }`}>
+                    {record.title}
+                  </div>
+                  <div>
                     <span
-                      className="inline-block px-2 py-1 text-xs rounded"
-                      style={{ backgroundColor: record.groupColor || "#gray" }}
+                      className="inline-block px-2 py-1 text-xs rounded text-white"
+                      style={{ backgroundColor: record.groupColor || "#6b7280" }}
                     >
                       {record.groupName}
                     </span>

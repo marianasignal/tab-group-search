@@ -1,86 +1,91 @@
 ---
 phase: 03-搜索面板
-verified: 2026-03-31T03:30:33Z
+verified: 2026-03-31T04:17:26Z
 status: passed
 score: 5/5 must-haves verified
-re_verification: false
+re_verification:
+  previous_status: passed
+  previous_score: 5/5
+  gaps_closed: []
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 3: 搜索面板 Verification Report
 
 **Phase Goal:** 用户可以在 3 秒内通过快捷键唤起面板并找到任何保存过的网页
-**Verified:** 2026-03-31T03:30:33Z
+**Verified:** 2026-03-31T04:17:26Z
 **Status:** passed
-**Re-verification:** No — 初次验证
+**Re-verification:** Yes — 回归检查，前次验证已通过
 
 ## Goal Achievement
 
 ### Observable Truths
 
-| #   | Truth                                                   | Status     | Evidence                                                              |
-| --- | ------------------------------------------------------- | ---------- | --------------------------------------------------------------------- |
-| 1   | 按下快捷键，搜索面板立即弹出                            | ✓ VERIFIED | manifest.json 配置 Ctrl+Space，index.tsx 监听 toggle-search 命令      |
-| 2   | 输入关键词时结果实时更新（标题、URL、分组名称均可命中） | ✓ VERIFIED | SearchPanel.tsx 使用 Fuse.js 搜索 title/url/groupName，300ms debounce |
-| 3   | 可以按分组名称过滤，只看某个分组的内容                  | ✓ VERIFIED | SearchPanel.tsx 实现分组标签过滤，链式过滤逻辑（先分组后搜索）        |
-| 4   | 每条搜索结果展示网页标题、URL 和所属分组                | ✓ VERIFIED | SearchPanel.tsx 渲染 record.title、record.url、record.groupName 标签  |
-| 5   | 点击结果在新标签页打开对应网页                          | ✓ VERIFIED | SearchPanel.tsx handleOpenUrl 调用 chrome.tabs.create                 |
+| #   | Truth                                                   | Status     | Evidence                                                                               |
+| --- | ------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------- |
+| 1   | 按下快捷键，搜索面板立即弹出                            | ✓ VERIFIED | manifest.json 配置 Ctrl+Space，background/index.ts 监听命令并发送消息到 content script |
+| 2   | 输入关键词时结果实时更新（标题、URL、分组名称均可命中） | ✓ VERIFIED | SearchPanel.tsx 使用 Fuse.js 搜索 title/url/groupName，300ms debounce                  |
+| 3   | 可以按分组名称过滤，只看某个分组的内容                  | ✓ VERIFIED | SearchPanel.tsx 实现分组标签过滤，链式过滤逻辑（先分组后搜索）                         |
+| 4   | 每条搜索结果展示网页标题、URL 和所属分组                | ✓ VERIFIED | SearchPanel.tsx 渲染 record.title、record.url、record.groupName 标签                   |
+| 5   | 点击结果在新标签页打开对应网页                          | ✓ VERIFIED | SearchPanel.tsx handleOpenUrl 调用 chrome.tabs.create                                  |
 
 **Score:** 5/5 truths verified
 
 ### Required Artifacts
 
-| Artifact | Expected | Status | Details |
-| -------- | -------- | ------ | ------- |
-| `src/manifest.json` | Content scripts 和 commands 配置 | ✓ VERIFIED | 包含 content_scripts、commands (Ctrl+Space)、permissions (commands) |
-| `src/content/index.tsx` | Content Script 入口 | ✓ VERIFIED | 监听 chrome.commands.onCommand、Esc 键、创建 React root |
-| `src/content/SearchPanel.tsx` | 搜索面板组件 | ✓ VERIFIED | 190 行，包含搜索、过滤、键盘导航完整实现 |
-| `src/content/index.css` | 样式隔离 | ✓ VERIFIED | Tailwind 导入 + CSS reset (all: initial) |
-| `package.json` | Fuse.js 依赖 | ✓ VERIFIED | fuse.js@^7.1.0 已安装 |
+| Artifact                      | Expected                         | Status     | Details                                                             |
+| ----------------------------- | -------------------------------- | ---------- | ------------------------------------------------------------------- |
+| `src/manifest.json`           | Content scripts 和 commands 配置 | ✓ VERIFIED | 包含 content_scripts、commands (Ctrl+Space)、permissions (commands) |
+| `src/content/index.tsx`       | Content Script 入口              | ✓ VERIFIED | 监听 chrome.runtime.onMessage、Esc 键、创建 React root              |
+| `src/content/SearchPanel.tsx` | 搜索面板组件                     | ✓ VERIFIED | 189 行，包含搜索、过滤、键盘导航完整实现                            |
+| `src/content/index.css`       | 样式隔离                         | ✓ VERIFIED | Tailwind 导入 + CSS reset (all: initial)                            |
+| `package.json`                | Fuse.js 依赖                     | ✓ VERIFIED | fuse.js@^7.1.0 已安装                                               |
+| `src/background/index.ts`     | 快捷键命令监听                   | ✓ VERIFIED | chrome.commands.onCommand 监听 toggle-search 命令 (line 217-230)    |
 
 ### Key Link Verification
 
-| From | To | Via | Status | Details |
-| ---- | -- | --- | ------ | ------- |
-| manifest.json | content/index.tsx | content_scripts 配置 | ✓ WIRED | matches: ["<all_urls>"], js/css 正确配置 |
-| index.tsx | SearchPanel.tsx | import + props 传递 | ✓ WIRED | 导入 SearchPanel，传递 isOpen/onClose props |
-| SearchPanel.tsx | chrome.storage.local | chrome.storage.local.get | ✓ WIRED | 读取 tab_records 数据 (line 26) |
-| SearchPanel.tsx | Fuse.js | import + 实例化 | ✓ WIRED | 导入 Fuse，创建实例搜索 (line 62-66) |
-| SearchPanel.tsx | chrome.tabs API | chrome.tabs.create | ✓ WIRED | 打开新标签页 (line 96) |
-| index.tsx | chrome.commands API | onCommand.addListener | ✓ WIRED | 监听 toggle-search 命令 (line 10) |
+| From                | To                   | Via                      | Status  | Details                                                |
+| ------------------- | -------------------- | ------------------------ | ------- | ------------------------------------------------------ |
+| manifest.json       | content/index.tsx    | content_scripts 配置     | ✓ WIRED | matches: ["<all_urls>"], js/css 正确配置               |
+| background/index.ts | content/index.tsx    | chrome.tabs.sendMessage  | ✓ WIRED | 监听 toggle-search 命令，发送 TOGGLE_SEARCH_PANEL 消息 |
+| index.tsx           | SearchPanel.tsx      | import + props 传递      | ✓ WIRED | 导入 SearchPanel，传递 isOpen/onClose props            |
+| SearchPanel.tsx     | chrome.storage.local | chrome.storage.local.get | ✓ WIRED | 读取 tab_records 数据 (line 26)                        |
+| SearchPanel.tsx     | Fuse.js              | import + 实例化          | ✓ WIRED | 导入 Fuse，创建实例搜索 (line 62-66)                   |
+| SearchPanel.tsx     | chrome.tabs API      | chrome.tabs.create       | ✓ WIRED | 打开新标签页 (line 96)                                 |
 
 ### Data-Flow Trace (Level 4)
 
-| Artifact | Data Variable | Source | Produces Real Data | Status |
-| -------- | ------------- | ------ | ------------------ | ------ |
-| SearchPanel.tsx | records | chrome.storage.local (tab_records) | Yes - Phase 2 sync.ts 写入 | ✓ FLOWING |
-| SearchPanel.tsx | searchResults | Fuse.js 搜索结果 | Yes - 从 records 派生 | ✓ FLOWING |
-| SearchPanel.tsx | groups | records 提取唯一分组 | Yes - 从 records 派生 | ✓ FLOWING |
+| Artifact        | Data Variable | Source                             | Produces Real Data         | Status    |
+| --------------- | ------------- | ---------------------------------- | -------------------------- | --------- |
+| SearchPanel.tsx | records       | chrome.storage.local (tab_records) | Yes - Phase 2 sync.ts 写入 | ✓ FLOWING |
+| SearchPanel.tsx | searchResults | Fuse.js 搜索结果                   | Yes - 从 records 派生      | ✓ FLOWING |
+| SearchPanel.tsx | groups        | records 提取唯一分组               | Yes - 从 records 派生      | ✓ FLOWING |
 
 **数据源验证:** background/sync.ts 的 saveAllRecords 函数写入 tab_records 到 chrome.storage.local (line 23-24)，SearchPanel.tsx 读取该数据 (line 26)。数据流完整连接。
 
-
 ### Requirements Coverage
 
-| Requirement | Source Plan | Description | Status | Evidence |
-| ----------- | ----------- | ----------- | ------ | -------- |
-| SEA-01 | 03-01 | 用户可通过快捷键唤起搜索面板 | ✓ SATISFIED | manifest.json commands 配置 Ctrl+Space，index.tsx 监听命令 |
-| SEA-02 | 03-02, 03-04 | 输入关键词实时搜索标题、URL、分组名称 | ✓ SATISFIED | SearchPanel.tsx Fuse.js 搜索 3 个字段，300ms debounce |
-| SEA-03 | 03-03 | 可按分组名称过滤浏览 | ✓ SATISFIED | SearchPanel.tsx 分组标签过滤，链式过滤逻辑 |
-| SEA-04 | 03-01, 03-02 | 搜索结果展示: 网页标题 + URL + 所属分组 | ✓ SATISFIED | SearchPanel.tsx 渲染 title/url/groupName (line 171-179) |
-| SEA-05 | 03-04 | 点击结果在新标签页打开对应网页 | ✓ SATISFIED | SearchPanel.tsx handleOpenUrl + 键盘导航 Enter 键 |
+| Requirement | Source Plan  | Description                             | Status      | Evidence                                                             |
+| ----------- | ------------ | --------------------------------------- | ----------- | -------------------------------------------------------------------- |
+| SEA-01      | 03-01        | 用户可通过快捷键唤起搜索面板            | ✓ SATISFIED | manifest.json commands 配置 Ctrl+Space，background/index.ts 监听命令 |
+| SEA-02      | 03-02, 03-04 | 输入关键词实时搜索标题、URL、分组名称   | ✓ SATISFIED | SearchPanel.tsx Fuse.js 搜索 3 个字段，300ms debounce                |
+| SEA-03      | 03-03        | 可按分组名称过滤浏览                    | ✓ SATISFIED | SearchPanel.tsx 分组标签过滤，链式过滤逻辑                           |
+| SEA-04      | 03-01, 03-02 | 搜索结果展示: 网页标题 + URL + 所属分组 | ✓ SATISFIED | SearchPanel.tsx 渲染 title/url/groupName (line 171-179)              |
+| SEA-05      | 03-04        | 点击结果在新标签页打开对应网页          | ✓ SATISFIED | SearchPanel.tsx handleOpenUrl + 键盘导航 Enter 键                    |
 
 **覆盖率:** 5/5 需求已满足 (100%)
 
 **无孤立需求** - REQUIREMENTS.md 中 Phase 3 的所有需求 (SEA-01 到 SEA-05) 均被计划覆盖并实现。
 
-
 ### Anti-Patterns Found
 
-| File | Line | Pattern | Severity | Impact |
-| ---- | ---- | ------- | -------- | ------ |
-| SearchPanel.tsx | 100 | `return null` | ℹ️ Info | 正常条件渲染，非 stub |
+| File            | Line | Pattern       | Severity | Impact                |
+| --------------- | ---- | ------------- | -------- | --------------------- |
+| SearchPanel.tsx | 100  | `return null` | ℹ️ Info  | 正常条件渲染，非 stub |
 
-**分析:** 
+**分析:**
+
 - SearchPanel.tsx line 100 的 `return null` 是正常的条件渲染逻辑（当 isOpen=false 时不渲染），不是 stub
 - 无 TODO/FIXME/PLACEHOLDER 注释
 - 无 console.log 调试代码
@@ -88,7 +93,6 @@ re_verification: false
 - 所有数据变量都有真实数据源
 
 **结论:** 无阻塞性反模式。代码质量良好。
-
 
 ### Behavioral Spot-Checks
 
@@ -128,6 +132,21 @@ Phase 3 产出为浏览器扩展 UI 组件，需要浏览器环境运行，无�
 **Expected:** 搜索面板关闭，页面恢复正常
 **Why human:** 需要验证关闭交互、状态清理
 
+## Re-verification Summary
+
+**前次验证状态:** passed (5/5)
+**本次验证状态:** passed (5/5)
+
+**回归检查结果:**
+
+- ✓ 所有 5 个 Observable Truths 仍然通过验证
+- ✓ 所有 6 个 Required Artifacts 存在且功能完整
+- ✓ 所有 6 个 Key Links 正确连接
+- ✓ 数据流完整（Level 4 验证通过）
+- ✓ 所有 5 个需求 (SEA-01 到 SEA-05) 仍然满足
+- ✓ 无新增反模式或代码退化
+
+**无退化发现** - Phase 3 的所有功能保持完整，代码质量良好，目标完全达成。
 
 ## Summary
 
@@ -147,5 +166,5 @@ Phase 3 目标已完全达成。所有 5 个 Success Criteria 均已验证通过
 
 ---
 
-_Verified: 2026-03-31T03:30:33Z_
+_Verified: 2026-03-31T04:17:26Z_
 _Verifier: Claude (gsd-verifier)_
