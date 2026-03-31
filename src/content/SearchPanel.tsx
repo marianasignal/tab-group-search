@@ -57,15 +57,14 @@ const S = {
     backgroundColor: selected ? "#ffffff" : "transparent",
     color: selected ? "#000000" : "#aaaaaa",
   }),
-  groupBtn: (selected: boolean, color: string) => ({
+  groupBtn: (selected: boolean) => ({
     padding: "4px 12px",
     fontSize: "13px",
     borderRadius: "4px",
-    border: selected ? "2px solid #ffffff" : "2px solid transparent",
+    border: selected ? "2px solid #ffffff" : "1px solid #555555",
     cursor: "pointer",
-    backgroundColor: color || "#6b7280",
+    backgroundColor: selected ? "#333333" : "#1a1a1a",
     color: "#ffffff",
-    opacity: selected ? 1 : 0.75,
   }),
   list: {
     flex: 1,
@@ -91,14 +90,14 @@ const S = {
     marginBottom: "6px",
     lineHeight: "1.4",
   }),
-  tag: (color: string) => ({
+  tag: {
     display: "inline-block",
     padding: "2px 8px",
     fontSize: "11px",
     borderRadius: "3px",
-    backgroundColor: color || "#6b7280",
-    color: "#ffffff",
-  }),
+    backgroundColor: "#333333",
+    color: "#aaaaaa",
+  },
 };
 
 export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => {
@@ -139,6 +138,18 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
 
   useEffect(() => setSelectedIndex(0), [searchResults]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.code === "Space") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [isOpen, onClose]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -149,9 +160,6 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
     } else if (e.key === "Enter" && searchResults[selectedIndex]) {
       e.preventDefault();
       handleOpenUrl(searchResults[selectedIndex].url);
-    } else if (e.ctrlKey && e.key === " ") {
-      e.preventDefault();
-      onClose();
     }
   };
 
@@ -188,7 +196,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
             {groups.map((group) => (
               <button
                 key={group.name}
-                style={S.groupBtn(selectedGroup === group.name, group.color)}
+                style={S.groupBtn(selectedGroup === group.name)}
                 onClick={() => setSelectedGroup(group.name)}
               >
                 {group.name}
@@ -209,7 +217,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
                 onClick={() => handleOpenUrl(record.url)}
               >
                 <div style={S.itemTitle(index === selectedIndex)}>{record.title}</div>
-                <span style={S.tag(record.groupColor)}>{record.groupName}</span>
+                <span style={S.tag}>{record.groupName}</span>
               </div>
             ))
           )}
