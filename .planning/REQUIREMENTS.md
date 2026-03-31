@@ -53,22 +53,25 @@
 
 ## Traceability
 
-| Requirement | Phase   | Status  |
-| ----------- | ------- | ------- |
+| Requirement | Phase   | Status   |
+| ----------- | ------- | -------- |
 | ARC-01      | Phase 1 | Complete |
 | ARC-02      | Phase 1 | Complete |
 | ARC-03      | Phase 1 | Complete |
 | ARC-04      | Phase 1 | Complete |
-| SYN-01      | Phase 2 | Pending |
-| SYN-02      | Phase 2 | Pending |
-| SYN-03      | Phase 2 | Pending |
-| SYN-04      | Phase 2 | Pending |
-| SEA-01      | Phase 3 | Pending |
-| SEA-02      | Phase 3 | Pending |
-| SEA-03      | Phase 3 | Pending |
-| SEA-04      | Phase 3 | Pending |
-| SEA-05      | Phase 3 | Pending |
+| SYN-01      | Phase 2 | Complete |
+| SYN-02      | Phase 2 | Complete |
+| SYN-03      | Phase 2 | Adjusted |
+| SYN-04      | Phase 2 | Complete |
+| SEA-01      | Phase 3 | Pending  |
+| SEA-02      | Phase 3 | Pending  |
+| SEA-03      | Phase 3 | Pending  |
+| SEA-04      | Phase 3 | Pending  |
+| SEA-05      | Phase 3 | Pending  |
+
+**Notes:**
+- SYN-03: 需求调整为"镜像同步"而非"保留历史记录"，详见 02-CONTEXT.md
 
 ---
 
-_Updated: 2026-03-30 — Roadmap created, traceability expanded to individual requirements_
+_Updated: 2026-03-31 — Phase 2 完成，SYN-01/02/04 满足，SYN-03 需求调整_
