@@ -106,5 +106,15 @@ This document evolves at phase transitions and milestone boundaries.
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
+## Current Milestone: v1.1 修复与稳定
+
+**Goal:** 复盘 v1.0 的设计与实现问题，修复所有已知 bug，建立正确的产品行为基线
+
+**Target features:**
+- 修复 content script iframe 多实例注入问题
+- 修复 React 筛选状态延迟（useMemo 替换 useEffect）
+- 修复标签组同步逻辑（持久化数据库设计）
+- 建立正确的标签组筛选器同步行为
+
 ---
-*Last updated: 2026-03-30 after initialization*
+*Last updated: 2026-03-31*

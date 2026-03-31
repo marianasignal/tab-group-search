@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 
 ## Current Position
 
-Phase: 03 (搜索面板) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 03
-Last activity: 2026-03-31
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v1.1
+Last activity: 2026-03-31 — Milestone v1.1 started
 
 Progress: [░░░░░░░░░░] 0%
 
