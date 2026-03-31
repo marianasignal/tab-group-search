@@ -7,6 +7,25 @@ interface SearchPanelProps {
   onClose: () => void;
 }
 
+// 计算颜色亮度并返回合适的文字颜色
+const getTextColor = (bgColor: string): string => {
+  // 如果是 Chrome 标签组颜色名称，使用白色
+  const chromeColors = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
+  if (chromeColors.includes(bgColor)) return '#ffffff';
+
+  // 如果是十六进制颜色，计算亮度
+  if (bgColor.startsWith('#')) {
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+  }
+
+  return '#ffffff';
+};
+
 export const SearchPanel: React.FC<SearchPanelProps> = ({
   isOpen,
   onClose,
@@ -151,12 +170,12 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
               <button
                 key={group.name}
                 onClick={() => setSelectedGroup(group.name)}
-                className={`px-3 py-1 text-sm rounded transition-all ${
+                className={`px-3 py-1 text-sm rounded transition-all font-medium ${
                   selectedGroup === group.name ? "ring-4 ring-blue-500 scale-110 shadow-lg" : "hover:scale-105"
                 }`}
                 style={{
                   backgroundColor: group.color || "#6b7280",
-                  color: "#fff",
+                  color: getTextColor(group.color || "#6b7280"),
                 }}
               >
                 {group.name}
@@ -197,8 +216,11 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
                   </div>
                   <div>
                     <span
-                      className="inline-block px-2 py-1 text-xs rounded text-white"
-                      style={{ backgroundColor: record.groupColor || "#6b7280" }}
+                      className="inline-block px-2 py-1 text-xs rounded font-medium"
+                      style={{
+                        backgroundColor: record.groupColor || "#6b7280",
+                        color: getTextColor(record.groupColor || "#6b7280")
+                      }}
                     >
                       {record.groupName}
                     </span>
