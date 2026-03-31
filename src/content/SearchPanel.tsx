@@ -114,11 +114,11 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-start justify-end z-[999999]"
+      className="fixed inset-0 bg-black/50 flex items-start justify-start z-[999999]"
       onClick={onClose}
     >
       <div
-        className="bg-white shadow-2xl w-[400px] h-full flex flex-col"
+        className="bg-white shadow-2xl w-[450px] h-full flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 搜索框 */}
@@ -151,11 +151,11 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
               <button
                 key={group.name}
                 onClick={() => setSelectedGroup(group.name)}
-                className={`px-3 py-1 text-sm rounded ${
-                  selectedGroup === group.name ? "ring-2 ring-blue-500" : ""
+                className={`px-3 py-1 text-sm rounded transition-all ${
+                  selectedGroup === group.name ? "ring-4 ring-blue-500 scale-110 shadow-lg" : "hover:scale-105"
                 }`}
                 style={{
-                  backgroundColor: group.color || "#gray",
+                  backgroundColor: group.color || "#6b7280",
                   color: "#fff",
                 }}
               >
@@ -190,11 +190,6 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
                   }
                   onClick={() => handleOpenUrl(record.url)}
                 >
-                  <div className={`text-sm font-mono mb-2 truncate ${
-                    index === selectedIndex ? "text-blue-100" : "text-gray-500"
-                  }`}>
-                    {record.url}
-                  </div>
                   <div className={`font-medium mb-2 ${
                     index === selectedIndex ? "text-white" : "text-gray-900"
                   }`}>
