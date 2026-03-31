@@ -6,12 +6,19 @@ const App = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // 监听快捷键命令
-    chrome.commands.onCommand.addListener((command) => {
-      if (command === "toggle-search") {
+    // 监听来自 background 的消息
+    const messageListener = (
+      message: { type: string },
+      sender: chrome.runtime.MessageSender,
+      sendResponse: (response?: any) => void
+    ) => {
+      if (message.type === 'TOGGLE_SEARCH_PANEL') {
         setIsOpen((prev) => !prev);
+        sendResponse({ success: true });
       }
-    });
+    };
+
+    chrome.runtime.onMessage.addListener(messageListener);
 
     // 监听 Esc 键关闭面板
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -21,7 +28,11 @@ const App = () => {
     };
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isOpen]);
 
   return <SearchPanel isOpen={isOpen} onClose={() => setIsOpen(false)} />;

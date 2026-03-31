@@ -209,3 +209,22 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
     console.error('[Tab Sync] Failed to delete tab record:', error);
   }
 });
+
+// ============================================
+// Phase 3: 搜索面板快捷键
+// ============================================
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === "toggle-search") {
+    console.log('[Search Panel] Toggle command received');
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab.id) {
+        await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SEARCH_PANEL' });
+        console.log('[Search Panel] Message sent to tab:', tab.id);
+      }
+    } catch (error) {
+      console.error('[Search Panel] Failed to send message:', error);
+    }
+  }
+});
