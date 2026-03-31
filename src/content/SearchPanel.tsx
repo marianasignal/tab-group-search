@@ -14,6 +14,10 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [records, setRecords] = useState<TabRecord[]>([]);
   const [searchResults, setSearchResults] = useState<TabRecord[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [groups, setGroups] = useState<Array<{ name: string; color: string }>>(
+    [],
+  );
 
   // 加载数据
   useEffect(() => {
@@ -21,6 +25,18 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
       chrome.storage.local.get(["tab_records"], (result) => {
         const allRecords = result.tab_records || [];
         setRecords(allRecords);
+
+        // 提取唯一分组
+        const uniqueGroups = Array.from(
+          new Map(
+            allRecords.map((r) => [
+              r.groupName,
+              { name: r.groupName, color: r.groupColor },
+            ]),
+          ).values(),
+        );
+        setGroups(uniqueGroups);
+
         setSearchResults(allRecords);
       });
     }
@@ -28,13 +44,21 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
 
   // 实现搜索
   useEffect(() => {
+    let filtered = records;
+
+    // 先按分组过滤
+    if (selectedGroup) {
+      filtered = filtered.filter((r) => r.groupName === selectedGroup);
+    }
+
+    // 再按关键词搜索
     if (!searchQuery.trim()) {
-      setSearchResults(records);
+      setSearchResults(filtered);
       return;
     }
 
     const timer = setTimeout(() => {
-      const fuse = new Fuse(records, {
+      const fuse = new Fuse(filtered, {
         keys: ["title", "url", "groupName"],
         threshold: 0.3,
         ignoreLocation: true,
@@ -45,7 +69,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, records]);
+  }, [searchQuery, records, selectedGroup]);
 
   const handleOpenUrl = (url: string) => {
     chrome.tabs.create({ url });
@@ -74,6 +98,37 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             autoFocus
           />
         </div>
+
+        {/* 分组过滤标签 */}
+        {groups.length > 0 && (
+          <div className="px-4 py-2 border-b flex gap-2 flex-wrap">
+            <button
+              onClick={() => setSelectedGroup(null)}
+              className={`px-3 py-1 text-sm rounded ${
+                selectedGroup === null
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              全部
+            </button>
+            {groups.map((group) => (
+              <button
+                key={group.name}
+                onClick={() => setSelectedGroup(group.name)}
+                className={`px-3 py-1 text-sm rounded ${
+                  selectedGroup === group.name ? "ring-2 ring-blue-500" : ""
+                }`}
+                style={{
+                  backgroundColor: group.color || "#gray",
+                  color: "#fff",
+                }}
+              >
+                {group.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* 结果列表 */}
         <div className="flex-1 overflow-y-auto">
