@@ -75,7 +75,7 @@ Plans:
 - [x] 03-01-PLAN.md — 搜索面板 UI 组件与快捷键 (SEA-01, SEA-04)
 - [x] 03-02-PLAN.md — 实时搜索功能 (SEA-02, SEA-04)
 - [x] 03-03-PLAN.md — 分组过滤功能 (SEA-03)
-- [ ] 03-04-PLAN.md — 键盘导航优化 (SEA-02, SEA-05)
+- [x] 03-04-PLAN.md — 键盘导航优化 (SEA-02, SEA-05)
 
 ## Progress
 
