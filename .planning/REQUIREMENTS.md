@@ -1,77 +1,46 @@
-# 注意力队列 — v1 需求文档
+# Requirements — v1.1 修复与稳定
 
-**Project:** 注意力队列 (Attention Queue)
-**Version:** v1
-**Date:** 2026-03-30
+## Milestone Goal
 
-## 核心定位
+复盘 v1.0 的设计与实现问题，修复所有已知 bug，建立正确的产品行为基线。
 
-**Chrome 标签组的搜索层 + 持久化层**
+## v1.1 Requirements
 
-- 增/删 由 Chrome 原生标签组完成
-- 插件负责: 自动同步标签组数据 → 持久化存储 → 快速搜索
+### BUG 修复
 
-## v1 Requirements
+- [ ] **BUG-01**: 修复 content script 在 iframe 中多实例注入（manifest.json 添加 `all_frames: false`）
+- [ ] **BUG-02**: 修复搜索面板分类筛选显示上一次结果的驻留问题（useMemo 替换 useEffect）
+- [ ] **BUG-03**: 修复标签组数据同步逻辑——标签组数据应持久化保存，不因标签/标签组关闭而删除
+- [ ] **BUG-04**: 修复搜索面板标签组筛选器——应显示 Chrome 当前实际存在的标签组，而非历史记录中的所有分组
 
-### SYNC — 自动同步标签组
+### 行为正确性
 
-- [ ] **SYN-01**: 监听 Chrome 标签组变化 (新增/修改/关闭),自动同步到本地数据库
-- [ ] **SYN-02**: 同步内容包含: 分组名称、网页标题、URL、同步时间
-- [ ] **SYN-03**: 标签页关闭时保留历史记录 (不自动删除)
-- [ ] **SYN-04**: 同一 URL 已存在时更新记录 (不重复存储)
+- [ ] **BEHAVIOR-01**: 搜索面板打开时，标签组筛选器与 Chrome 实际标签组保持一致
+- [ ] **BEHAVIOR-02**: 点击标签组按钮后，列表立即只显示该分组的网页记录
+- [ ] **BEHAVIOR-03**: 关闭标签组后，网页记录仍保留在数据库中（可通过"全部"查看）
+- [ ] **BEHAVIOR-04**: 删除 Chrome 标签组后，下次打开面板时该分组按钮消失
 
-### SEARCH — 搜索与检索 (核心)
+## Future Requirements
 
-- [ ] **SEA-01**: 用户可通过快捷键唤起搜索面板
-- [ ] **SEA-02**: 输入关键词实时搜索标题、URL、分组名称
-- [ ] **SEA-03**: 可按分组名称过滤浏览
-- [ ] **SEA-04**: 搜索结果展示: 网页标题 + URL + 所属分组
-- [ ] **SEA-05**: 点击结果在新标签页打开对应网页
+（从 v1.0 延期）
+- 手动保存网页（用户主动确认加入队列）
+- 管理界面（查看、编辑、删除所有记录）
+- 网页缩略图存储
 
-### ARCH — 技术基础
+## Out of Scope (v1.1)
 
-- [x] **ARC-01**: Chrome Manifest V3 扩展
-- [x] **ARC-02**: 使用 chrome.tabGroups API + chrome.tabs API 监听标签组变化
-- [x] **ARC-03**: 数据本地存储 (chrome.storage.local)
-- [x] **ARC-04**: Service Worker 无状态设计
-
-## v2 Requirements (Deferred)
-
-- 手动添加不在标签组中的网页
-- 缩略图预览
-- 跨设备同步
-- 全文搜索 (网页正文)
-- 管理界面 (编辑/删除历史记录)
-- 数据导出
-
-## Out of Scope (v1)
-
-- 手动保存/弹窗确认流程 — Chrome 标签组原生完成
-- 独立管理界面 — v1 专注搜索
-- 缩略图 — 降低复杂度
-- 自动关闭标签页 — 用户通过 Chrome 原生操作
+- 新功能开发 — 本里程碑仅修复 bug，不添加新功能
+- UI 重设计 — 保持现有视觉风格
 
 ## Traceability
 
-| Requirement | Phase   | Status   |
-| ----------- | ------- | -------- |
-| ARC-01      | Phase 1 | Complete |
-| ARC-02      | Phase 1 | Complete |
-| ARC-03      | Phase 1 | Complete |
-| ARC-04      | Phase 1 | Complete |
-| SYN-01      | Phase 2 | Complete |
-| SYN-02      | Phase 2 | Complete |
-| SYN-03      | Phase 2 | Adjusted |
-| SYN-04      | Phase 2 | Complete |
-| SEA-01      | Phase 3 | Pending  |
-| SEA-02      | Phase 3 | Pending  |
-| SEA-03      | Phase 3 | Pending  |
-| SEA-04      | Phase 3 | Pending  |
-| SEA-05      | Phase 3 | Pending  |
-
-**Notes:**
-- SYN-03: 需求调整为"镜像同步"而非"保留历史记录"，详见 02-CONTEXT.md
-
----
-
-_Updated: 2026-03-31 — Phase 2 完成，SYN-01/02/04 满足，SYN-03 需求调整_
+| REQ-ID | Phase | Status |
+|--------|-------|--------|
+| BUG-01 | 4 | Done |
+| BUG-02 | 4 | Done |
+| BUG-03 | 4 | Done |
+| BUG-04 | 4 | Done |
+| BEHAVIOR-01 | 4 | Done |
+| BEHAVIOR-02 | 4 | Done |
+| BEHAVIOR-03 | 4 | Done |
+| BEHAVIOR-04 | 4 | Done |
