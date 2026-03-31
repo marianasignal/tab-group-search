@@ -6,11 +6,28 @@
   "permissions": [
     "storage",
     "tabGroups",
-    "tabs"
+    "tabs",
+    "commands"
   ],
   "background": {
     "service_worker": "src/background/index.ts",
     "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/index.tsx"],
+      "css": ["src/content/index.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "toggle-search": {
+      "suggested_key": {
+        "default": "Ctrl+Space"
+      },
+      "description": "打开/关闭搜索面板"
+    }
   },
   "icons": {
     "16": "icons/icon16.png",
