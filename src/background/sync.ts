@@ -41,9 +41,11 @@ export function findRecordByTabId(records: TabRecord[], tabId: number): TabRecor
 export function findRecordByUrlAndGroup(
   records: TabRecord[],
   url: string,
-  groupId: number
+  groupName: string
 ): TabRecord | undefined {
-  return records.find(r => r.url === url && r.groupId === groupId);
+  // 使用 groupName 而不是 groupId 去重
+  // 因为标签组关闭再打开时 Chrome 会分配新的 groupId
+  return records.find(r => r.url === url && r.groupName === groupName);
 }
 
 export function findRecordsByGroupId(records: TabRecord[], groupId: number): TabRecord[] {
@@ -59,12 +61,15 @@ export function upsertRecord(
   tab: chrome.tabs.Tab,
   group: chrome.tabGroups.TabGroup
 ): TabRecord[] {
-  const existing = findRecordByUrlAndGroup(records, tab.url!, group.id);
+  // 使用 groupName 去重，因为 groupId 在标签组关闭再打开时会变化
+  const groupName = group.title || '(untitled)';
+  const existing = findRecordByUrlAndGroup(records, tab.url!, groupName);
 
   if (existing) {
+    // 更新现有记录（包括 groupId，因为可能变了）
     return records.map(r =>
       r.id === existing.id
-        ? { ...r, title: tab.title!, syncedAt: Date.now() }
+        ? { ...r, tabId: tab.id!, groupId: group.id, title: tab.title!, syncedAt: Date.now() }
         : r
     );
   } else {
@@ -74,7 +79,7 @@ export function upsertRecord(
       url: tab.url!,
       title: tab.title!,
       groupId: group.id,
-      groupName: group.title || '(untitled)',
+      groupName: groupName,
       groupColor: group.color,
       syncedAt: Date.now(),
     };

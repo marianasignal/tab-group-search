@@ -29,9 +29,12 @@ const S = {
   searchBox: {
     padding: "16px",
     borderBottom: "1px solid #333333",
+    display: "flex",
+    gap: "8px",
+    alignItems: "center",
   },
   input: {
-    width: "100%",
+    flex: 1,
     padding: "10px 16px",
     backgroundColor: "#111111",
     color: "#ffffff",
@@ -40,6 +43,16 @@ const S = {
     fontSize: "14px",
     outline: "none",
     boxSizing: "border-box" as const,
+  },
+  syncBtn: {
+    padding: "10px 14px",
+    fontSize: "13px",
+    borderRadius: "8px",
+    border: "1px solid #444444",
+    cursor: "pointer",
+    backgroundColor: "#1a1a1a",
+    color: "#ffffff",
+    whiteSpace: "nowrap" as const,
   },
   groupBar: {
     padding: "10px 16px",
@@ -108,39 +121,71 @@ const S = {
 export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [records, setRecords] = useState<TabRecord[]>([]);
-  const [searchResults, setSearchResults] = useState<TabRecord[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [groups, setGroups] = useState<Array<{ name: string; color: string }>>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
 
+  // 计算搜索结果（使用 useMemo 确保同步更新）
+  const searchResults = React.useMemo(() => {
+    console.log('[SearchPanel] Computing search results:', {
+      totalRecords: records.length,
+      selectedGroup,
+      searchQuery,
+    });
+
+    let filtered = records;
+
+    // 先按分组筛选
+    if (selectedGroup) {
+      filtered = filtered.filter((r) => r.groupName === selectedGroup);
+      console.log('[SearchPanel] After group filter:', {
+        selectedGroup,
+        filteredCount: filtered.length,
+      });
+    }
+
+    // 如果没有搜索词，直接返回筛选结果
+    if (!searchQuery.trim()) {
+      console.log('[SearchPanel] No search query, returning filtered results:', filtered.length);
+      return filtered;
+    }
+
+    // 有搜索词时，使用 Fuse.js 模糊搜索
+    const fuse = new Fuse(filtered, {
+      keys: ["title", "url"],
+      threshold: 0.3,
+      ignoreLocation: true
+    });
+    const results = fuse.search(searchQuery).map((r) => r.item);
+    console.log('[SearchPanel] Search results:', results.length);
+    return results;
+  }, [records, selectedGroup, searchQuery]);
+
+  // 加载数据
   useEffect(() => {
     if (isOpen) {
-      chrome.storage.local.get(["tab_records"], (result) => {
-        const allRecords = result.tab_records || [];
-        setRecords(allRecords);
-        const uniqueGroups = Array.from(
-          new Map(allRecords.map((r) => [r.groupName, { name: r.groupName, color: r.groupColor }])).values()
-        );
-        setGroups(uniqueGroups);
-        setSearchResults(allRecords);
-      });
+      const loadData = async () => {
+        // 从持久化数据库读取（包含所有历史标签组，不管是否还有打开的标签页）
+        try {
+          const response = await chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' });
+          const allRecords = response?.records || [];
+          const groupList = response?.groups || [];
+          console.log('[SearchPanel] Loaded', allRecords.length, 'records,', groupList.length, 'groups');
+          setRecords(allRecords);
+          setGroups(groupList);
+        } catch (error) {
+          console.error('[SearchPanel] Failed to load data:', error);
+        }
+      };
+
+      loadData();
+
+      return () => {};
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    let filtered = records;
-    if (selectedGroup) filtered = filtered.filter((r) => r.groupName === selectedGroup);
-    if (!searchQuery.trim()) {
-      setSearchResults(filtered);
-      return;
-    }
-    const timer = setTimeout(() => {
-      const fuse = new Fuse(filtered, { keys: ["title", "url", "groupName"], threshold: 0.3, ignoreLocation: true });
-      setSearchResults(fuse.search(searchQuery).map((r) => r.item));
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery, records, selectedGroup]);
-
+  // 重置选中索引
   useEffect(() => setSelectedIndex(0), [searchResults]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -161,6 +206,30 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
     onClose();
   };
 
+  const handleSync = async () => {
+    // 确认提示：同步会完全替换为当前打开的标签页
+    const confirmed = window.confirm(
+      '同步将删除所有历史记录，只保留当前 Chrome 中实际打开的标签页。\n\n确定要同步吗？'
+    );
+    if (!confirmed) return;
+
+    setIsSyncing(true);
+    try {
+      await chrome.runtime.sendMessage({ type: 'SYNC_TAB_GROUPS' });
+      // 同步完成后重新加载数据
+      const response = await chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' });
+      const allRecords = response?.records || [];
+      const groupList = response?.groups || [];
+      console.log('[SearchPanel] Synced and loaded', allRecords.length, 'records,', groupList.length, 'groups');
+      setRecords(allRecords);
+      setGroups(groupList);
+    } catch (error) {
+      console.error('[SearchPanel] Failed to sync:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -178,6 +247,9 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
             style={S.input}
             autoFocus
           />
+          <button style={S.syncBtn} onClick={handleSync} disabled={isSyncing}>
+            {isSyncing ? '同步中...' : '⟳ 同步'}
+          </button>
         </div>
 
         {/* 分组过滤 */}
@@ -205,7 +277,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ isOpen, onClose }) => 
           ) : (
             searchResults.map((record, index) => (
               <div
-                key={record.url}
+                key={record.id}
                 style={S.item(index === selectedIndex)}
                 onClick={() => handleOpenUrl(record.url)}
               >

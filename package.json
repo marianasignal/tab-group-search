@@ -1,7 +1,7 @@
 {
-  "name": "tmp",
+  "name": "tab-group-search",
   "version": "1.0.0",
-  "description": "",
+  "description": "标签组检索插件 - Chrome 标签组搜索与管理系统",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
@@ -9,8 +9,8 @@
     "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["chrome-extension", "tab-groups", "search", "标签组", "检索"],
+  "author": "Signal",
   "license": "ISC",
   "type": "module",
   "dependencies": {
