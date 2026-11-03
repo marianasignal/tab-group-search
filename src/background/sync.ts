@@ -1,4 +1,4 @@
-import type { TabRecord } from '../types/storage';
+import type { StorageSchema, TabRecord } from '../types/storage';
 
 /**
  * 标签组同步工具模块
@@ -10,7 +10,7 @@ import type { TabRecord } from '../types/storage';
 
 export async function getAllRecords(): Promise<TabRecord[]> {
   try {
-    const result = await chrome.storage.local.get('tab_records');
+    const result = await chrome.storage.local.get<Partial<StorageSchema>>('tab_records');
     return result.tab_records || [];
   } catch (error) {
     console.error('[Tab Sync] Failed to read records:', error);

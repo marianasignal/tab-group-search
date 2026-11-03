@@ -1,4 +1,4 @@
-import type { StorageTestData } from '../types/storage';
+import type { StorageSchema, StorageTestData } from '../types/storage';
 import * as sync from './sync';
 
 /**
@@ -57,7 +57,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
   // ARC-03: 验证 chrome.storage.local 读取
   try {
-    const result = await chrome.storage.local.get('test_data');
+    const result = await chrome.storage.local.get<Partial<StorageSchema>>('test_data');
     console.log('[Tab Group Search] Storage read SUCCESS:', result.test_data);
 
     if (result.test_data && result.test_data.timestamp === testData.timestamp) {
@@ -270,10 +270,17 @@ chrome.commands.onCommand.addListener(async (command) => {
         console.log('[Search Panel] Message sent to tab:', tab.id);
       } catch (error) {
         console.log('[Search Panel] Content script not loaded, injecting...');
+        const contentScript = chrome.runtime.getManifest().content_scripts![0];
         await chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          files: ['src/content/index.tsx']
+          files: contentScript.js!
         });
+        if (contentScript.css?.length) {
+          await chrome.scripting.insertCSS({
+            target: { tabId: tab.id },
+            files: contentScript.css
+          });
+        }
         // 等待 content script 初始化
         await new Promise(resolve => setTimeout(resolve, 100));
         await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SEARCH_PANEL' });
@@ -286,7 +293,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 // 监听来自 content script 和 popup 的消息
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'GET_ALL_DATA') {
     (async () => {
       try {

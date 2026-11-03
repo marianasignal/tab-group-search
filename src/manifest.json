@@ -2,15 +2,15 @@
   "manifest_version": 3,
   "name": "标签组检索插件 - Tab Group Search",
   "version": "1.0.0",
-  "description": "Chrome 标签组搜索层 + 持久化层，3秒内找到任意已保存网页",
-  "permissions": ["storage", "tabGroups", "tabs", "commands", "scripting", "notifications"],
+  "description": "按标题或网址搜索 Chrome 标签组中的网页，支持分组筛选与本地保存。",
+  "permissions": ["storage", "tabGroups", "tabs", "activeTab", "scripting", "notifications"],
   "background": {
     "service_worker": "src/background/index.ts",
     "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["http://*/*", "https://*/*"],
       "js": ["src/content/index.tsx"],
       "css": ["src/content/index.css"],
       "run_at": "document_idle",

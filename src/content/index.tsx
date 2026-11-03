@@ -17,7 +17,7 @@ const App = () => {
     // 监听来自 background 的消息
     const messageListener = (
       message: { type: string },
-      sender: chrome.runtime.MessageSender,
+      _sender: chrome.runtime.MessageSender,
       sendResponse: (response?: any) => void
     ) => {
       console.log('[Content Script] Message received:', message.type, 'current state:', isOpenRef.current);
