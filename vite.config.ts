@@ -11,5 +11,10 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        search: 'src/search/index.html',
+      },
+    },
   },
 });

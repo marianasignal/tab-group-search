@@ -1,5 +1,7 @@
 import type { StorageSchema, StorageTestData } from '../types/storage';
 import * as sync from './sync';
+import searchScript from '../content/index.tsx?script';
+import searchStyles from '../content/index.css?inline';
 
 /**
  * 标签组检索插件 - Service Worker (MV3)
@@ -14,22 +16,42 @@ import * as sync from './sync';
 // 工具函数
 // ============================================
 
-/**
- * 重试发送消息到 content script，直到成功或达到最大重试次数
- */
-async function retrySendMessage(tabId: number, message: any, maxRetries = 30, retryDelay = 300): Promise<boolean> {
-  for (let i = 0; i < maxRetries; i++) {
+async function toggleSearch(tab: chrome.tabs.Tab | undefined): Promise<void> {
+  const searchPageUrl = chrome.runtime.getURL('src/search/index.html');
+
+  if (tab?.id !== undefined && tab.url === searchPageUrl) {
+    await chrome.tabs.remove(tab.id);
+    return;
+  }
+
+  if (tab?.id !== undefined && /^https?:\/\//.test(tab.url || '')) {
     try {
-      await chrome.tabs.sendMessage(tabId, message);
-      console.log(`[Background] Message sent successfully on attempt ${i + 1}`);
-      return true;
-    } catch (e: any) {
-      console.log(`[Background] Attempt ${i + 1} failed: ${e.message}`);
-      await new Promise(r => setTimeout(r, retryDelay));
+      try {
+        await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SEARCH_PANEL' });
+      } catch {
+        const [documentCheck] = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => document.body instanceof HTMLBodyElement
+        });
+        if (!documentCheck.result) {
+          throw new Error('This document cannot display the search panel');
+        }
+        await chrome.scripting.insertCSS({
+          target: { tabId: tab.id },
+          css: searchStyles
+        });
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: [searchScript]
+        });
+      }
+      return;
+    } catch (error) {
+      console.warn('[Search Panel] Cannot open on this page:', error);
     }
   }
-  console.error(`[Background] Failed to send message after ${maxRetries} attempts`);
-  return false;
+
+  await chrome.tabs.create({ url: searchPageUrl });
 }
 
 // ============================================
@@ -219,73 +241,12 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 // Phase 3: 搜索面板快捷键
 // ============================================
 
-chrome.commands.onCommand.addListener(async (command) => {
+chrome.commands.onCommand.addListener(async (command, commandTab) => {
   if (command === "toggle-search") {
     console.log('[Search Panel] Toggle command received');
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-      if (!tab.id) {
-        console.warn('[Search Panel] No active tab found');
-        return;
-      }
-
-      // 检查是否是特殊页面（chrome://, edge://, about:, etc.）
-      if (tab.url && (
-        tab.url.startsWith('chrome://') ||
-        tab.url.startsWith('edge://') ||
-        tab.url.startsWith('about:') ||
-        tab.url.startsWith('chrome-extension://')
-      )) {
-        console.warn('[Search Panel] Cannot inject on special pages:', tab.url);
-        // 显示通知并打开新页跳转到 google.com
-        try {
-          await chrome.notifications.create({
-            type: 'basic',
-            iconUrl: chrome.runtime.getURL('icons/icon128.png'),
-            title: '标签组检索插件',
-            message: '本页面无法启动搜索面板，即将跳转到 Google'
-          });
-        } catch (e) {
-          console.warn('[Search Panel] Notification failed:', e);
-        }
-        // 打开新页跳转到 google.com，然后自动打开搜索面板
-        const newTab = await chrome.tabs.create({ url: 'https://www.google.com' });
-        console.log('[Search Panel] Opened new tab:', newTab.id);
-        // 等待页面加载完成后打开搜索面板
-        chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
-          if (tabId === newTab.id && info.status === 'complete') {
-            chrome.tabs.onUpdated.removeListener(listener);
-            console.log('[Search Panel] New tab loaded, will retry until content script ready');
-            // 使用重试机制直到 content script 就绪
-            retrySendMessage(newTab.id, { type: 'TOGGLE_SEARCH_PANEL' });
-          }
-        });
-        return;
-      }
-
-      // 尝试发送消息，如果失败则说明 content script 未加载
-      try {
-        await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SEARCH_PANEL' });
-        console.log('[Search Panel] Message sent to tab:', tab.id);
-      } catch (error) {
-        console.log('[Search Panel] Content script not loaded, injecting...');
-        const contentScript = chrome.runtime.getManifest().content_scripts![0];
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: contentScript.js!
-        });
-        if (contentScript.css?.length) {
-          await chrome.scripting.insertCSS({
-            target: { tabId: tab.id },
-            files: contentScript.css
-          });
-        }
-        // 等待 content script 初始化
-        await new Promise(resolve => setTimeout(resolve, 100));
-        await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_SEARCH_PANEL' });
-        console.log('[Search Panel] Injected and message sent');
-      }
+      const tab = commandTab || (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+      await toggleSearch(tab);
     } catch (error) {
       console.error('[Search Panel] Failed to send message:', error);
     }
@@ -371,41 +332,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
-  if (message.type === 'OPEN_SEARCH_IN_NEW_TAB') {
-    console.log('[Background] Opening search in new tab');
+  if (message.type === 'TOGGLE_SEARCH_FROM_POPUP') {
     (async () => {
       try {
-        // 显示通知
-        if (message.notification) {
-          await chrome.notifications.create(message.notification);
-        }
-        // 打开新标签页
-        const newTab = await chrome.tabs.create({ url: 'https://www.google.com' });
-        console.log('[Background] New tab created:', newTab.id);
-        // 设置监听器等待页面加载完成
-        chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
-          if (tabId === newTab.id && info.status === 'complete') {
-            chrome.tabs.onUpdated.removeListener(listener);
-            console.log('[Background] Tab loaded, starting toggle retry for tab:', newTab.id);
-            // 重试直到 content script 就绪
-            retrySendMessage(newTab.id, { type: 'TOGGLE_SEARCH_PANEL' });
-          }
-        });
-        sendResponse({ success: true, tabId: newTab.id });
-      } catch (error: any) {
-        console.error('[Background] Failed to open new tab:', error);
-        sendResponse({ success: false, error: error.message });
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        await toggleSearch(tab);
+        sendResponse({ success: true });
+      } catch (error) {
+        console.error('[Background] Failed to open search:', error);
+        sendResponse({ success: false, error: String(error) });
       }
-    })();
-    return true;
-  }
-
-  if (message.type === 'TOGGLE_SEARCH_FROM_POPUP') {
-    console.log('[Background] Toggle search from popup for tab:', message.tabId);
-
-    (async () => {
-      const success = await retrySendMessage(message.tabId, { type: 'TOGGLE_SEARCH_PANEL' }, 15);
-      sendResponse({ success, error: success ? undefined : 'Content script not responding' });
     })();
 
     return true;

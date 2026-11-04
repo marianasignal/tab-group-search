@@ -2,6 +2,17 @@ import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { SearchPanel } from "./SearchPanel";
 
+let toggleMountedPanel: () => void;
+let resolvePanelReady: () => void;
+const panelReady = new Promise<void>((resolve) => {
+  resolvePanelReady = resolve;
+});
+
+export async function onExecute() {
+  await panelReady;
+  toggleMountedPanel();
+}
+
 const App = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [, forceRender] = useState({});
@@ -14,6 +25,13 @@ const App = () => {
   }, [isOpen]);
 
   useEffect(() => {
+    const togglePanel = () => {
+      const newValue = !isOpenRef.current;
+      isOpenRef.current = newValue;
+      setIsOpen(newValue);
+      return newValue;
+    };
+
     // 监听来自 background 的消息
     const messageListener = (
       message: { type: string },
@@ -22,7 +40,7 @@ const App = () => {
     ) => {
       console.log('[Content Script] Message received:', message.type, 'current state:', isOpenRef.current);
       if (message.type === 'TOGGLE_SEARCH_PANEL') {
-        const newValue = !isOpenRef.current;
+        const newValue = togglePanel();
         console.log('[Content Script] Toggling to:', newValue);
         // 强制更新：先设置状态，再强制重新渲染
         setIsOpen(newValue);
@@ -37,6 +55,8 @@ const App = () => {
     };
 
     chrome.runtime.onMessage.addListener(messageListener);
+    toggleMountedPanel = togglePanel;
+    resolvePanelReady();
     console.log('[Content Script] Message listener registered');
 
     return () => {
@@ -67,6 +87,7 @@ const App = () => {
 // 创建容器并挂载
 const container = document.createElement("div");
 container.id = "attention-queue-search-panel";
+document.getElementById(container.id)?.remove();
 
 // 确保 body 存在
 if (document.body) {
