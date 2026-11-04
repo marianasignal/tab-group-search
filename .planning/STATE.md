@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-11-04T01:24:22.711Z"
+last_updated: "2026-11-04T02:21:30.577Z"
 last_activity: 2026-11-04
 progress:
   total_phases: 3
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 Phase: Not started (defining requirements)
 Plan: —
 Status: Defining requirements for v1.1
-Last activity: 2026-11-04 — Clean 1.0.2 package verified; Chrome Web Store upload pending
+Last activity: 2026-11-04 — Reduced-permission 1.0.3 verified; Chrome Web Store upload pending
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -95,6 +95,7 @@ None yet.
 | --- | --- | --- | --- | --- | --- |
 | 261103-nhs | Chrome Web Store package and submission materials | 2026-11-03 | c01a2c9 | Prepared; browser access required | [261103-nhs](./quick/261103-nhs-prepare-tab-group-search-chrome-web-stor/) |
 | 261104-d2b | Remove local store assets from release and sync GitHub | 2026-11-04 | eebdea3 | Package verified; store upload pending | [261104-d2b](./quick/261104-d2b-clean-local-store-assets-package-version/) |
+| 261104-dqp | Reduce permissions and prepare 1.0.3 | 2026-11-04 | 122a35c | Build, browser, routing, and ZIP checks passed; store upload pending | [261104-dqp](./quick/261104-dqp-reduce-extension-permissions-and-release/) |
 
 ## Session Continuity
 
