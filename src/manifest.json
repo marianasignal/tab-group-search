@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "标签组检索插件 - Tab Group Search",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "按标题或网址搜索 Chrome 标签组中的网页，支持分组筛选与本地保存。",
   "permissions": ["storage", "tabGroups", "tabs", "activeTab", "scripting", "notifications"],
   "background": {
