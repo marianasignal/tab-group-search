@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-03-31T09:42:53.681Z"
-last_activity: 2026-11-03
+last_updated: "2026-11-04T01:24:22.711Z"
+last_activity: 2026-11-04
 progress:
   total_phases: 3
   completed_phases: 3
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 Phase: Not started (defining requirements)
 Plan: —
 Status: Defining requirements for v1.1
-Last activity: 2026-11-03 — Prepared Chrome Web Store candidate; browser validation and submission pending
+Last activity: 2026-11-04 — Clean 1.0.2 package verified; Chrome Web Store upload pending
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -94,6 +94,7 @@ None yet.
 | # | Description | Date | Commit | Status | Directory |
 | --- | --- | --- | --- | --- | --- |
 | 261103-nhs | Chrome Web Store package and submission materials | 2026-11-03 | c01a2c9 | Prepared; browser access required | [261103-nhs](./quick/261103-nhs-prepare-tab-group-search-chrome-web-stor/) |
+| 261104-d2b | Remove local store assets from release and sync GitHub | 2026-11-04 | eebdea3 | Package verified; store upload pending | [261104-d2b](./quick/261104-d2b-clean-local-store-assets-package-version/) |
 
 ## Session Continuity
 
