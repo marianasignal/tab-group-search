@@ -1,11 +1,12 @@
 # Chrome Web Store 提交资料
 
-更新日期：2026-11-04。用户已确认尚未提交审核；本文件对应收紧权限后的 1.0.3，仍需在商店重新上传，不代表已送审或获批。
+更新日期：2026-11-05。用户已确认插件发布，商店公开页面已核实名称和版本 1.0.3。
 
 ## 当前状态
 
 - 源码仓库：`https://github.com/marianasignal/tab-group-search`
 - 商店名称：标签组检索插件 - Tab Group Search
+- 商店安装地址：`https://chromewebstore.google.com/detail/fdkkfaokcpdgclionojiliblbacphljl`
 - 版本：1.0.3
 - 建议语言：简体中文
 - 建议分类：生产力；以开发者后台实际可选分类为准
@@ -15,7 +16,7 @@
 - 支持地址：`https://github.com/marianasignal/tab-group-search/issues`
 - 开发者显示名称建议：Signal；实际开发者身份和联系邮箱由账号持有人确认
 
-需要在实际提交前完成：上传 1.0.3 包、核对商店必填资料与截图，以及商店后台的隐私声明确认。上传文件包不等于提交审核或审核通过。
+1.0.3 已发布。以下描述、权限说明和测试步骤保留为后续版本提交的参考资料；更新版本时需根据实际实现重新核对。
 
 ## 简短描述
 

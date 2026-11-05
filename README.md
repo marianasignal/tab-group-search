@@ -1,5 +1,7 @@
 # 标签组检索插件
 
+**[在 Chrome 应用商店安装](https://chromewebstore.google.com/detail/fdkkfaokcpdgclionojiliblbacphljl)** · 已发布版本：1.0.3
+
 Chrome 浏览器扩展，将网页管理从"标签页状态"转变为"数据库思维"。通过增删查操作管理网页，以注意力为核心，快速找到需要的内容，同时释放浏览器内存。
 
 ## 核心功能
@@ -69,6 +71,12 @@ npm run typecheck
 ```
 
 ## 安装
+
+### 从 Chrome 应用商店安装
+
+打开[插件的商店页面](https://chromewebstore.google.com/detail/fdkkfaokcpdgclionojiliblbacphljl)，点击“添加至 Chrome”，按浏览器提示确认安装。
+
+### 从源码安装（开发者）
 
 1. 构建项目: `npm run build`
 2. 打开 Chrome 扩展管理页面: `chrome://extensions/`
